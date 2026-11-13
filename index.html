@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kitchen Essentials in AR</title>
+  <!-- Google's free 3D/AR viewer -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f4f1;
+      --card: #ffffff;
+      --text: #1f1d1a;
+      --muted: #6b665f;
+      --accent: #c2572b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 16px 8px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.9rem; }
+    header p { margin: 0; color: var(--muted); }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+    model-viewer {
+      width: 100%;
+      height: 340px;
+      background: #eeebe6;
+      --poster-color: transparent;
+    }
+    .info { padding: 14px 18px 18px; }
+    .info h2 { margin: 0 0 4px; font-size: 1.15rem; }
+    .info p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    /* The AR button (only appears on AR-capable phones) */
+    .ar-button {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 0 16px 32px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Kitchen Essentials</h1>
+    <p>Drag to spin. On your phone, tap "View in your space" to place it on your counter at real size.</p>
+  </header>
+
+  <main>
+    <!-- ITEM 1: MUG. Change src to your exact file name. -->
+    <section class="card">
+      <model-viewer src="mug.glb" alt="Ceramic coffee mug"
+        ar ar-modes="webxr scene-viewer quick-look"
+        ar-scale="fixed" ar-placement="floor"
+        camera-controls touch-action="pan-y"
+        shadow-intensity="1" exposure="1">
+        <button slot="ar-button" class="ar-button">View in your space</button>
+      </model-viewer>
+      <div class="info">
+        <h2>Coffee Mug</h2>
+        <p>9.5 cm tall &middot; 8 cm wide</p>
+      </div>
+    </section>
+
+    <!-- ITEM 2: COOKING POT -->
+    <section class="card">
+      <model-viewer src="pot.glb" alt="Stainless steel cooking pot with lid"
+        ar ar-modes="webxr scene-viewer quick-look"
+        ar-scale="fixed" ar-placement="floor"
+        camera-controls touch-action="pan-y"
+        shadow-intensity="1" exposure="1">
+        <button slot="ar-button" class="ar-button">View in your space</button>
+      </model-viewer>
+      <div class="info">
+        <h2>Cooking Pot with Lid</h2>
+        <p>14 cm tall &middot; 22 cm wide</p>
+      </div>
+    </section>
+
+    <!-- ITEM 3: KETTLE -->
+    <section class="card">
+      <model-viewer src="kettle.glb" alt="Stovetop kettle"
+        ar ar-modes="webxr scene-viewer quick-look"
+        ar-scale="fixed" ar-placement="floor"
+        camera-controls touch-action="pan-y"
+        shadow-intensity="1" exposure="1">
+        <button slot="ar-button" class="ar-button">View in your space</button>
+      </model-viewer>
+      <div class="info">
+        <h2>Stovetop Kettle</h2>
+        <p>22 cm tall</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <!-- If you used Tripo's free tier for any model, keep this line. Otherwise delete it. -->
+    3D kettle model generated with Tripo.
+  </footer>
+</body>
+</html>
