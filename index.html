@@ -1,135 +1,656 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kitchen Essentials in AR</title>
-  <!-- Google's free 3D/AR viewer -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <style>
-    :root {
-      --bg: #f6f4f1;
-      --card: #ffffff;
-      --text: #1f1d1a;
-      --muted: #6b665f;
-      --accent: #c2572b;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    header {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 40px 16px 8px;
-    }
-    h1 { margin: 0 0 6px; font-size: 1.9rem; }
-    header p { margin: 0; color: var(--muted); }
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    }
-    model-viewer {
-      width: 100%;
-      height: 340px;
-      background: #eeebe6;
-      --poster-color: transparent;
-    }
-    .info { padding: 14px 18px 18px; }
-    .info h2 { margin: 0 0 4px; font-size: 1.15rem; }
-    .info p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-    /* The AR button (only appears on AR-capable phones) */
-    .ar-button {
-      position: absolute;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-      padding: 0 16px 32px;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homestead | See it in your home</title>
+<meta name="description" content="Home and kitchen essentials you can place in your own home with your phone's camera before you buy.">
+
+<!-- Google's free 3D + AR viewer -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
+<!-- Small free library that draws the QR code on computers -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --surface-2: #efe9e1;
+    --text: #1f1b16;
+    --muted: #6f675d;
+    --line: #e2dbd1;
+    --accent: #b4532a;
+    --accent-dark: #93421f;
+    --accent-ink: #ffffff;
+    --accent-soft: #f6e3d8;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(31, 27, 22, 0.06), 0 6px 20px rgba(31, 27, 22, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  a { color: inherit; }
+  button { font: inherit; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 16px; }
+  svg.icon { width: 18px; height: 18px; flex: none; }
+
+  /* ---------- Header ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(247, 244, 239, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; flex-wrap: wrap; }
+  .logo { font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; white-space: nowrap; }
+  .logo span { color: var(--accent); }
+  .search { flex: 1; position: relative; max-width: 560px; margin-left: auto; min-width: 220px; }
+  .search input {
+    width: 100%; padding: 11px 14px 11px 42px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface); font-size: 1rem; color: var(--text);
+  }
+  .search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .search .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 12px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; border: 1px solid var(--line); background: var(--surface);
+    padding: 7px 15px; border-radius: 999px; cursor: pointer; color: var(--text); font-size: 0.92rem;
+  }
+  .chip:hover { border-color: var(--muted); }
+  .chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  @media (max-width: 600px) {
+    .search { flex-basis: 100%; max-width: none; margin-left: 0; }
+  }
+
+  /* ---------- Home ---------- */
+  .hero {
+    margin: 24px 0 8px; padding: 28px;
+    border-radius: var(--radius);
+    background: linear-gradient(120deg, var(--accent-soft), #fbf1ea 60%, var(--surface));
+    display: flex; gap: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  }
+  .hero h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 3.5vw, 2.2rem); letter-spacing: -0.02em; line-height: 1.15; }
+  .hero p { margin: 0; color: var(--muted); max-width: 560px; }
+  .hero .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border-radius: 999px; padding: 8px 14px;
+    font-weight: 600; font-size: 0.9rem; box-shadow: var(--shadow); color: var(--accent-dark);
+  }
+  section.group { margin: 28px 0 8px; }
+  .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .group-head h2 { margin: 0; font-size: 1.25rem; }
+  .group-head .count { color: var(--muted); font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 16px; }
+  @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+
+  .card {
+    background: var(--surface); border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow); text-decoration: none;
+    display: flex; flex-direction: column; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  a.card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(31,27,22,.08), 0 12px 28px rgba(31,27,22,.1); }
+  a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .card .media { aspect-ratio: 1; background: #fff; position: relative; display: grid; place-items: center; }
+  .card .media img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
+  .badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    font-size: 0.74rem; font-weight: 650; padding: 3px 9px 3px 7px; border-radius: 999px;
+    display: flex; gap: 5px; align-items: center; color: var(--accent-dark);
+  }
+  .badge .icon { width: 14px; height: 14px; }
+  .card .body { padding: 12px 14px 14px; }
+  .card h3 { margin: 0 0 2px; font-size: 1rem; line-height: 1.3; }
+  .card .meta { color: var(--muted); font-size: 0.85rem; }
+  .card .price { font-weight: 700; margin-top: 4px; }
+  .card.soon { box-shadow: none; background: transparent; border: 2px dashed var(--line); }
+  .card.soon .media { background: transparent; }
+  .card.soon h3 { color: var(--muted); }
+  .tag-soon { display: inline-block; font-size: 0.75rem; font-weight: 600; background: var(--surface-2); color: var(--muted); padding: 2px 8px; border-radius: 999px; }
+
+  .ph {
+    display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;
+    text-align: center; color: var(--muted); font-size: 0.8rem; padding: 12px; width: 100%; height: 100%;
+    background: var(--surface-2);
+  }
+  .card.soon .ph { background: transparent; }
+  .ph .icon { width: 28px; height: 28px; opacity: 0.6; }
+  .ph code { font-size: 0.78rem; background: var(--surface); padding: 1px 6px; border-radius: 6px; }
+
+  .empty { text-align: center; padding: 56px 16px; color: var(--muted); }
+  .empty button, .link-btn {
+    margin-top: 12px; border: 1px solid var(--line); background: var(--surface);
+    padding: 8px 16px; border-radius: 999px; cursor: pointer; color: var(--text);
+  }
+
+  /* ---------- Product page ---------- */
+  .back { display: inline-flex; align-items: center; gap: 6px; margin: 20px 0 4px; color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+  .back:hover { color: var(--text); }
+  .product { display: grid; grid-template-columns: 1.1fr 1fr; gap: 36px; margin: 12px 0 56px; align-items: start; }
+  @media (max-width: 800px) { .product { grid-template-columns: 1fr; gap: 20px; } }
+  .gallery .main {
+    aspect-ratio: 1; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+    display: grid; place-items: center; overflow: hidden;
+  }
+  .gallery .main img { width: 100%; height: 100%; object-fit: contain; padding: 20px; }
+  .thumbs { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .thumb {
+    width: 72px; height: 72px; border-radius: 12px; border: 2px solid var(--line);
+    background: #fff; padding: 0; cursor: pointer; overflow: hidden;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+  .thumb .ph { font-size: 0; gap: 0; }
+  .thumb .ph .icon { width: 20px; height: 20px; }
+  .thumb[aria-current="true"] { border-color: var(--accent); }
+  .info .cat { color: var(--accent-dark); font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+  .info h1 { margin: 4px 0 6px; font-size: clamp(1.6rem, 3vw, 2.1rem); line-height: 1.15; letter-spacing: -0.02em; }
+  .info .price { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+  .info .desc { color: var(--muted); margin: 0 0 20px; }
+  .try-card {
+    background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; margin-bottom: 20px;
+  }
+  .try-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    padding: 15px 18px; border: none; border-radius: 12px;
+    background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 1.05rem; cursor: pointer;
+  }
+  .try-btn:hover { background: var(--accent-dark); }
+  .try-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+  .try-btn .icon { width: 22px; height: 22px; }
+  .try-btn[disabled] { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+  .try-card p { margin: 10px 0 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
+  .specs { border-top: 1px solid var(--line); }
+  .specs div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+  .specs dt { color: var(--muted); }
+  .specs dd { margin: 0; font-weight: 600; text-align: right; }
+
+  /* ---------- Try-it-in-your-household viewer ---------- */
+  .modal {
+    position: fixed; inset: 0; z-index: 50; background: rgba(20, 16, 12, 0.6);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal[hidden] { display: none; }
+  .panel {
+    background: var(--surface); border-radius: 20px; width: min(980px, 100%);
+    height: min(640px, calc(100vh - 32px)); overflow: hidden;
+    display: grid; grid-template-columns: 1.5fr 1fr; position: relative;
+  }
+  .viewer { position: relative; background: #f1ede7; min-height: 0; }
+  model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+  .ar-btn {
+    position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px; white-space: nowrap;
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 999px;
+    padding: 14px 22px; font-weight: 700; font-size: 1rem; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
+  }
+  .ar-btn .icon { width: 20px; height: 20px; }
+  .viewer-error {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; color: var(--muted); gap: 6px;
+  }
+  .viewer-error[hidden] { display: none; }
+  .side { padding: 24px; overflow: auto; border-left: 1px solid var(--line); }
+  .side h2 { margin: 0 0 4px; font-size: 1.3rem; line-height: 1.2; padding-right: 36px; }
+  .side .size { color: var(--muted); margin: 0 0 18px; font-size: 0.92rem; }
+  .side h3 { font-size: 0.95rem; margin: 0 0 8px; }
+  .side ol { margin: 0; padding-left: 20px; }
+  .side li { margin-bottom: 8px; }
+  .side .note { font-size: 0.85rem; color: var(--muted); margin-top: 16px; }
+  .qr-box { display: flex; gap: 16px; align-items: center; background: var(--bg); border-radius: 14px; padding: 14px; }
+  .qr { background: #fff; padding: 8px; border-radius: 10px; flex: none; width: 156px; height: 156px; }
+  .qr img, .qr canvas { display: block; width: 140px !important; height: 140px !important; }
+  .close {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--text);
+  }
+  .close:hover { background: var(--bg); }
+  .help[hidden] { display: none; }
+  @media (max-width: 760px) {
+    .modal { padding: 0; }
+    .panel { border-radius: 0; width: 100%; height: 100%; grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .side { border-left: none; border-top: 1px solid var(--line); max-height: 42vh; padding: 18px 16px 22px; }
+  }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 0.88rem; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Kitchen Essentials</h1>
-    <p>Drag to spin. On your phone, tap "View in your space" to place it on your counter at real size.</p>
-  </header>
 
-  <main>
-    <!-- ITEM 1: MUG. Change src to your exact file name. -->
-    <section class="card">
-      <model-viewer src="mug.glb" alt="Ceramic coffee mug"
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <a class="logo" href="#/" id="logo">Home<span>stead</span></a>
+      <div class="search" role="search">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="visually-hidden" for="search">Search products</label>
+        <input id="search" type="search" placeholder="Search kettles, mugs, lamps..." autocomplete="off">
+      </div>
+    </div>
+    <nav class="chips" id="chips" aria-label="Categories"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <span id="footer-name">&copy; Homestead</span>
+    <!-- Keep this line if any model came from Tripo's free plan (CC BY licence). Delete it otherwise. -->
+    <span>Some 3D models generated with Tripo.</span>
+  </div>
+</footer>
+
+<!-- Try it in your household (3D + AR viewer) -->
+<div class="modal" id="tryon" hidden role="dialog" aria-modal="true" aria-labelledby="tryon-title">
+  <div class="panel">
+    <button class="close" id="tryon-close" aria-label="Close">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="viewer">
+      <model-viewer id="mv"
+        camera-controls touch-action="pan-y"
         ar ar-modes="webxr scene-viewer quick-look"
         ar-scale="fixed" ar-placement="floor"
-        camera-controls touch-action="pan-y"
         shadow-intensity="1" exposure="1">
-        <button slot="ar-button" class="ar-button">View in your space</button>
+        <button slot="ar-button" class="ar-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>
+          Place it in my room
+        </button>
       </model-viewer>
-      <div class="info">
-        <h2>Coffee Mug</h2>
-        <p>9.5 cm tall &middot; 8 cm wide</p>
+      <div class="viewer-error" id="viewer-error" hidden>
+        <strong>3D model couldn't load</strong>
+        <span id="viewer-error-text"></span>
       </div>
-    </section>
+    </div>
+    <div class="side">
+      <h2 id="tryon-title">Product</h2>
+      <p class="size" id="tryon-size"></p>
 
-    <!-- ITEM 2: COOKING POT -->
-    <section class="card">
-      <model-viewer src="pot.glb" alt="Stainless steel cooking pot with lid"
-        ar ar-modes="webxr scene-viewer quick-look"
-        ar-scale="fixed" ar-placement="floor"
-        camera-controls touch-action="pan-y"
-        shadow-intensity="1" exposure="1">
-        <button slot="ar-button" class="ar-button">View in your space</button>
-      </model-viewer>
-      <div class="info">
-        <h2>Cooking Pot with Lid</h2>
-        <p>14 cm tall &middot; 22 cm wide</p>
+      <!-- Shown on phones that support AR -->
+      <div class="help" id="help-phone" hidden>
+        <h3>See it at real size</h3>
+        <ol>
+          <li>Tap <strong>Place it in my room</strong>.</li>
+          <li>Point your camera at your counter, table or floor and move slowly until it's detected.</li>
+          <li>Tap to place it. It stays put, so walk around it to see every angle.</li>
+        </ol>
       </div>
-    </section>
 
-    <!-- ITEM 3: KETTLE -->
-    <section class="card">
-      <model-viewer src="kettle.glb" alt="Stovetop kettle"
-        ar ar-modes="webxr scene-viewer quick-look"
-        ar-scale="fixed" ar-placement="floor"
-        camera-controls touch-action="pan-y"
-        shadow-intensity="1" exposure="1">
-        <button slot="ar-button" class="ar-button">View in your space</button>
-      </model-viewer>
-      <div class="info">
-        <h2>Stovetop Kettle</h2>
-        <p>22 cm tall</p>
+      <!-- Shown on phones whose browser can't open AR -->
+      <div class="help" id="help-noar" hidden>
+        <h3>Want to place it in your room?</h3>
+        <p>This browser can't open your camera view. Open this page in <strong>Safari</strong> on iPhone or <strong>Chrome</strong> on Android. If you opened the link from another app, copy it into your browser first.</p>
+        <p>You can still drag to spin the 3D model and pinch to zoom.</p>
       </div>
-    </section>
-  </main>
 
-  <footer>
-    <!-- If you used Tripo's free tier for any model, keep this line. Otherwise delete it. -->
-    3D kettle model generated with Tripo.
-  </footer>
+      <!-- Shown on computers -->
+      <div class="help" id="help-desktop" hidden>
+        <h3>Place it in your home</h3>
+        <div class="qr-box">
+          <div class="qr" id="qr" aria-label="QR code linking to this product"></div>
+          <div>Scan with your phone's camera to open this product, then tap <strong>Place it in my room</strong>.</div>
+        </div>
+        <p class="note">Drag to spin the model. Scroll to zoom.</p>
+      </div>
+
+      <p class="note">Shown at true size. Placement is usually accurate to within a few centimetres.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   EDIT YOUR STORE HERE
+   ===================================================================== */
+
+const STORE_NAME = 'Homestead';
+
+const CATEGORIES = [
+  { id: 'kitchen',  name: 'Kitchen' },
+  { id: 'living',   name: 'Living Room' },
+  { id: 'bedroom',  name: 'Bedroom' },
+  { id: 'bathroom', name: 'Bathroom' },
+  { id: 'decor',    name: 'Decor & Garden' },
+];
+
+/*
+  One entry per product.
+  - images: photo file names, uploaded next to index.html. The first one is the card photo.
+  - model:  the .glb file. Leave it out and the "Try it" button shows "coming soon".
+  - height / width: in centimetres (inches are worked out automatically).
+  - placement: 'floor' for anything that sits on a surface, 'wall' for wall items.
+  - price: leave as '' to hide it.
+  - comingSoon: true shows a dashed placeholder card.
+*/
+const PRODUCTS = [
+  {
+    id: 'stovetop-kettle',
+    name: 'Stovetop Kettle',
+    category: 'kitchen',
+    price: '',
+    description: 'A classic 2.5 L whistling kettle for the stovetop, with a heat-resistant handle and spout.',
+    height: 21.8, width: 19.3, capacity: '2.5 L',
+    images: ['kettle-1.jpg', 'kettle-2.jpg', 'kettle-3.jpg'],
+    model: 'kettle.glb',
+    placement: 'floor',
+    tags: ['tea', 'water', 'whistling', 'stainless steel', 'boil'],
+  },
+  {
+    id: 'cooking-pot',
+    name: 'Cooking Pot with Glass Lid',
+    category: 'kitchen',
+    price: '',
+    description: 'An everyday stainless steel pot with side handles and a see-through glass lid, for soups, pasta and stews.',
+    height: 19.1, width: 19.8,
+    images: ['pot-1.jpg', 'pot-2.jpg', 'pot-3.jpg'],
+    model: 'pot.glb',
+    placement: 'floor',
+    tags: ['saucepan', 'stock pot', 'cookware', 'stainless steel', 'lid'],
+  },
+  {
+    id: 'coffee-mug',
+    name: 'Ceramic Coffee Mug',
+    category: 'kitchen',
+    price: '',
+    description: 'A glazed ceramic mug with a comfortable handle, sized for your morning coffee or tea.',
+    height: 9.5, width: 8,
+    images: ['mug-1.jpg', 'mug-2.jpg'],
+    model: 'mug.glb',
+    placement: 'floor',
+    tags: ['cup', 'coffee', 'tea', 'ceramic'],
+  },
+
+  /* ----- Coming soon (blank cards) ----- */
+  { id: 'frying-pan',      name: 'Non-stick Frying Pan', category: 'kitchen',  comingSoon: true, tags: ['skillet', 'cookware'] },
+  { id: 'cutting-board',   name: 'Wooden Cutting Board', category: 'kitchen',  comingSoon: true, tags: ['chopping'] },
+  { id: 'table-lamp',      name: 'Table Lamp',           category: 'living',   comingSoon: true, tags: ['light', 'lighting'] },
+  { id: 'side-table',      name: 'Round Side Table',     category: 'living',   comingSoon: true, tags: ['furniture'] },
+  { id: 'throw-cushion',   name: 'Throw Cushion',        category: 'living',   comingSoon: true, tags: ['pillow', 'sofa'] },
+  { id: 'bedside-lamp',    name: 'Bedside Lamp',         category: 'bedroom',  comingSoon: true, tags: ['light', 'nightstand'] },
+  { id: 'alarm-clock',     name: 'Alarm Clock',          category: 'bedroom',  comingSoon: true, tags: ['clock'] },
+  { id: 'soap-dispenser',  name: 'Soap Dispenser',       category: 'bathroom', comingSoon: true, tags: ['pump', 'sink'] },
+  { id: 'toothbrush-cup',  name: 'Toothbrush Holder',    category: 'bathroom', comingSoon: true, tags: ['cup', 'sink'] },
+  { id: 'plant-pot',       name: 'Ceramic Plant Pot',    category: 'decor',    comingSoon: true, tags: ['planter', 'garden', 'plant'] },
+  { id: 'glass-vase',      name: 'Glass Vase',           category: 'decor',    comingSoon: true, tags: ['flowers'] },
+  { id: 'wall-clock',      name: 'Wall Clock',           category: 'decor',    comingSoon: true, tags: ['clock'] },
+];
+
+/* =====================================================================
+   SITE CODE (no need to edit below)
+   ===================================================================== */
+
+const ICON_BOX = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>';
+const ICON_IMAGE = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>';
+const ICON_BACK = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
+
+const app = document.getElementById('app');
+const chipsEl = document.getElementById('chips');
+const searchEl = document.getElementById('search');
+const modal = document.getElementById('tryon');
+const mv = document.getElementById('mv');
+
+const state = { category: 'all', query: '', productId: null, view: null };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const catName = id => (CATEGORIES.find(c => c.id === id) || {}).name || id;
+const inches = cm => (cm / 2.54).toFixed(1);
+const fmtSize = cm => `${cm} cm (${inches(cm)} in)`;
+const findProduct = id => PRODUCTS.find(p => p.id === id);
+
+function placeholder(text, icon = ICON_IMAGE) {
+  return `<div class="ph">${icon}<span>${text}</span></div>`;
+}
+function img(src, alt) {
+  if (!src) return placeholder('Photo coming soon');
+  return `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy" data-file="${esc(src)}" onerror="imgFallback(this)">`;
+}
+// If a photo file is missing, show which file name to upload instead of a broken image
+function imgFallback(el) {
+  const div = document.createElement('div');
+  div.innerHTML = placeholder(`Add photo:<br><code>${esc(el.dataset.file)}</code>`);
+  el.replaceWith(div.firstElementChild);
+}
+
+/* ---------- Categories ---------- */
+function renderChips() {
+  const active = state.view === 'product' ? (findProduct(state.productId) || {}).category : state.category;
+  const all = [{ id: 'all', name: 'All' }, ...CATEGORIES];
+  chipsEl.innerHTML = all.map(c =>
+    `<button class="chip" data-cat="${c.id}" aria-pressed="${c.id === active}">${esc(c.name)}</button>`
+  ).join('');
+}
+chipsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  state.query = '';
+  searchEl.value = '';
+  location.hash = btn.dataset.cat === 'all' ? '#/' : `#/category/${btn.dataset.cat}`;
+  if (state.view === 'home') renderHome();
+});
+
+/* ---------- Product cards ---------- */
+function card(p) {
+  if (p.comingSoon) {
+    return `<div class="card soon" aria-label="${esc(p.name)}, coming soon">
+      <div class="media">${placeholder('3D model in progress', ICON_BOX)}</div>
+      <div class="body"><h3>${esc(p.name)}</h3><span class="tag-soon">Coming soon</span></div>
+    </div>`;
+  }
+  const meta = [catName(p.category), p.height ? `${p.height} cm tall` : ''].filter(Boolean).join(' · ');
+  return `<a class="card" href="#/product/${p.id}">
+    <div class="media">
+      ${img(p.images && p.images[0], p.name)}
+      ${p.model ? `<span class="badge">${ICON_BOX}See it in your home</span>` : ''}
+    </div>
+    <div class="body">
+      <h3>${esc(p.name)}</h3>
+      <div class="meta">${esc(meta)}</div>
+      ${p.price ? `<div class="price">${esc(p.price)}</div>` : ''}
+    </div>
+  </a>`;
+}
+function group(title, list) {
+  const ready = list.filter(p => !p.comingSoon).length;
+  return `<section class="group">
+    <div class="group-head"><h2>${esc(title)}</h2><span class="count">${ready ? `${ready} in 3D` : 'Coming soon'}</span></div>
+    <div class="grid">${list.map(card).join('')}</div>
+  </section>`;
+}
+
+/* ---------- Home / category / search ---------- */
+function matches(p, q) {
+  const text = [p.name, catName(p.category), p.description, ...(p.tags || [])].join(' ').toLowerCase();
+  return q.split(/\s+/).every(word => text.includes(word));
+}
+function renderHome() {
+  const q = state.query.trim().toLowerCase();
+  const inCat = PRODUCTS.filter(p => state.category === 'all' || p.category === state.category);
+  let html = '';
+
+  if (state.category === 'all' && !q) {
+    html += `<div class="hero">
+      <div>
+        <h1>See it in your home before you buy.</h1>
+        <p>Open any product with the 3D badge and tap <strong>Try it in your household</strong> to place it on your counter, table or floor at its real size, using your phone's camera.</p>
+      </div>
+      <span class="pill">${ICON_BOX}True-to-size AR</span>
+    </div>`;
+  }
+
+  if (q) {
+    const results = inCat.filter(p => matches(p, q));
+    const where = state.category === 'all' ? '' : ` in ${catName(state.category)}`;
+    if (!results.length) {
+      html += `<div class="empty"><p>No products match "<strong>${esc(state.query.trim())}</strong>"${esc(where)}.</p>
+        <button type="button" id="clear-search">Clear search</button></div>`;
+    } else {
+      html += `<section class="group">
+        <div class="group-head"><h2>Results for "${esc(state.query.trim())}"${esc(where)}</h2><span class="count">${results.length} found</span></div>
+        <div class="grid">${results.map(card).join('')}</div></section>`;
+    }
+  } else if (state.category === 'all') {
+    // Products with 3D models first within each category
+    CATEGORIES.forEach(c => {
+      const list = PRODUCTS.filter(p => p.category === c.id).sort((a, b) => !!a.comingSoon - !!b.comingSoon);
+      if (list.length) html += group(c.name, list);
+    });
+  } else {
+    html += group(catName(state.category), inCat.sort((a, b) => !!a.comingSoon - !!b.comingSoon));
+  }
+
+  app.innerHTML = html;
+  const clear = document.getElementById('clear-search');
+  if (clear) clear.addEventListener('click', () => { searchEl.value = ''; state.query = ''; renderHome(); searchEl.focus(); });
+}
+
+searchEl.addEventListener('input', () => {
+  state.query = searchEl.value;
+  if (state.view !== 'home') {
+    location.hash = state.category === 'all' ? '#/' : `#/category/${state.category}`;
+  } else {
+    renderHome();
+  }
+});
+
+/* ---------- Product page ---------- */
+function renderProduct(p) {
+  const images = (p.images && p.images.length) ? p.images : [null];
+  const specs = [
+    p.height && ['Height', fmtSize(p.height)],
+    p.width && ['Width', fmtSize(p.width)],
+    p.capacity && ['Capacity', p.capacity],
+    ['Category', catName(p.category)],
+  ].filter(Boolean);
+
+  app.innerHTML = `
+    <a class="back" href="${state.category === 'all' ? '#/' : `#/category/${state.category}`}">${ICON_BACK}Back to products</a>
+    <div class="product">
+      <div class="gallery">
+        <div class="main" id="main-img">${img(images[0], p.name)}</div>
+        ${images.length > 1 ? `<div class="thumbs">${images.map((src, i) =>
+          `<button class="thumb" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}">${img(src, '')}</button>`
+        ).join('')}</div>` : ''}
+      </div>
+      <div class="info">
+        <a class="cat" href="#/category/${p.category}">${esc(catName(p.category))}</a>
+        <h1>${esc(p.name)}</h1>
+        ${p.price ? `<div class="price">${esc(p.price)}</div>` : ''}
+        ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ''}
+        <div class="try-card">
+          ${p.model
+            ? `<button class="try-btn" id="try-btn">${ICON_BOX}Try it in your household</button>
+               <p>See it at its real size on your counter or table, using your phone's camera.</p>`
+            : `<button class="try-btn" disabled>${ICON_BOX}3D preview coming soon</button>`}
+        </div>
+        <dl class="specs">${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+      </div>
+    </div>`;
+
+  app.querySelectorAll('.thumb').forEach(btn => btn.addEventListener('click', () => {
+    document.getElementById('main-img').innerHTML = img(images[+btn.dataset.i], p.name);
+    app.querySelectorAll('.thumb').forEach(t => t.setAttribute('aria-current', t === btn));
+  }));
+  const tryBtn = document.getElementById('try-btn');
+  if (tryBtn) tryBtn.addEventListener('click', () => { location.hash = `#/product/${p.id}/try`; });
+}
+
+/* ---------- Try it in your household ---------- */
+let modalOpen = false;
+
+function showHelp() {
+  const canAR = !!mv.canActivateAR;
+  const touch = window.matchMedia('(pointer: coarse)').matches;
+  document.getElementById('help-phone').hidden = !canAR;
+  document.getElementById('help-noar').hidden = canAR || !touch;
+  document.getElementById('help-desktop').hidden = canAR || touch;
+}
+
+function openTryOn(p) {
+  document.getElementById('tryon-title').textContent = p.name;
+  document.getElementById('tryon-size').textContent =
+    [p.height && `${fmtSize(p.height)} tall`, p.width && `${fmtSize(p.width)} wide`].filter(Boolean).join(' · ');
+  document.getElementById('viewer-error').hidden = true;
+
+  mv.setAttribute('alt', `3D model of ${p.name}`);
+  mv.setAttribute('ar-placement', p.placement || 'floor');
+  if (p.iosModel) mv.setAttribute('ios-src', p.iosModel); else mv.removeAttribute('ios-src');
+  if (mv.getAttribute('src') !== p.model) mv.setAttribute('src', p.model);
+
+  // QR code for computers: opens this product's 3D view on the phone
+  const qrEl = document.getElementById('qr');
+  qrEl.innerHTML = '';
+  const url = `${location.href.split('#')[0]}#/product/${p.id}/try`;
+  if (window.QRCode) new QRCode(qrEl, { text: url, width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
+
+  modal.hidden = false;
+  modalOpen = true;
+  document.body.style.overflow = 'hidden';
+  showHelp();
+  customElements.whenDefined('model-viewer').then(showHelp);
+  document.getElementById('tryon-close').focus();
+}
+
+function closeTryOn() {
+  if (!modalOpen) return;
+  modal.hidden = true;
+  modalOpen = false;
+  document.body.style.overflow = '';
+}
+
+mv.addEventListener('load', showHelp);
+mv.addEventListener('error', () => {
+  document.getElementById('viewer-error').hidden = false;
+  document.getElementById('viewer-error-text').innerHTML =
+    `Check that <code>${esc(mv.getAttribute('src'))}</code> is uploaded next to index.html and the name matches exactly.`;
+});
+
+function leaveTryOn() { location.hash = `#/product/${state.productId}`; }
+document.getElementById('tryon-close').addEventListener('click', leaveTryOn);
+modal.addEventListener('click', e => { if (e.target === modal) leaveTryOn(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalOpen) leaveTryOn(); });
+
+/* ---------- Page routing (#/, #/category/kitchen, #/product/id, #/product/id/try) ---------- */
+function route() {
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  const prevView = state.view, prevId = state.productId;
+
+  if (parts[0] === 'product') {
+    const p = findProduct(parts[1]);
+    if (!p || p.comingSoon) { location.replace('#/'); return; }
+    state.view = 'product';
+    state.productId = p.id;
+    if (prevView !== 'product' || prevId !== p.id) { renderProduct(p); window.scrollTo(0, 0); }
+    renderChips();
+    if (parts[2] === 'try' && p.model) openTryOn(p); else closeTryOn();
+    document.title = `${p.name} | ${STORE_NAME}`;
+    return;
+  }
+
+  closeTryOn();
+  state.view = 'home';
+  state.productId = null;
+  state.category = (parts[0] === 'category' && CATEGORIES.some(c => c.id === parts[1])) ? parts[1] : 'all';
+  renderChips();
+  renderHome();
+  if (prevView !== 'home') window.scrollTo(0, 0);
+  document.title = state.category === 'all' ? `${STORE_NAME} | See it in your home` : `${catName(state.category)} | ${STORE_NAME}`;
+}
+
+document.getElementById('footer-name').textContent = `© ${new Date().getFullYear()} ${STORE_NAME}`;
+window.addEventListener('hashchange', route);
+route();
+</script>
 </body>
 </html>
